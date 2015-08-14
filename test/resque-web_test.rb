@@ -1,5 +1,6 @@
 require 'test_helper'
 require 'resque/server/test_helper'
+require 'nokogiri'
  
 # Root path test
 context "on GET to /" do
@@ -31,6 +32,31 @@ context "on GET to /failed" do
   setup { get "/failed" }
 
   should_respond_with_success
+end
+
+# With failures
+context "on GET to /failed with failures" do
+  setup do
+    Resque.redis.flushall
+    10.times { Resque::Job.create(:jobs, BadJob) }
+    @worker = Resque::Worker.new(:jobs)
+    @worker.work(0)
+    assert_equal 10, Resque::Failure.count
+    get "/failed"
+  end
+
+  teardown do
+    Resque.redis.flushall
+    assert_equal 0, Resque::Failure.count
+  end
+
+  test "should show failures" do
+    body =last_response.body 
+    html = Nokogiri::HTML(body)
+    first = html.search('.failed li').first
+    puts first
+    assert_equal first.attr('data-id'), '0'
+  end
 end
 
 # Stats 

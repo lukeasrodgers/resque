@@ -12,4 +12,5 @@ group :test do
   gem "minitest", "4.7.0"
   gem "json"
   gem "test-unit", "~> 3.0"
+  gem 'nokogiri'
 end
