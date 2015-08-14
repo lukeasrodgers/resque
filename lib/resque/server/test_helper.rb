@@ -1,5 +1,6 @@
 require 'rack/test'
 require 'resque/server'
+require 'test/unit'
 
 module Resque
   module TestHelper
